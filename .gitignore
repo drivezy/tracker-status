@@ -6,3 +6,4 @@ src/**/*.css
 firebase-debug.log
 package-lock.json
 src/Constants/global.constants.js
+.firebase*

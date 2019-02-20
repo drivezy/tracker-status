@@ -4,19 +4,17 @@ import moment from 'moment';
 
 import './index.css';
 
-const endPoint = 'https://analytics.justride.in/svt/devices/';
-// const url = 'https://analytics.justride.in/svt/devices/170800056?key=4655oWxflzaETX'
-const key = '?key=4655oWxflzaETX'
+const endPoint = 'http://justride.svt.in/devices';
 
 const headers = {
-    'Content-Type': 'application/json;charset=UTF-8'
+    'Content-Type': 'application/json;charset=UTF-8',
+    'access-key': '55oWxflzaEiVcKvpNWcS'
 };
-
 
 class ShowMessage extends Component {
     render() {
         const { message, type = 'success' } = this.props;
-        const path = type == 'success' ? require('./../img/correct.png') : require('./../img/error.png');
+        const path = type === 'success' ? require('./../img/correct.png') : require('./../img/error.png');
         return (
             <div className='result message animated' id={`display-${type}`}>
                 <img src={path} alt="Success" />
@@ -41,7 +39,7 @@ export default class TrackerCheck extends Component {
 
     validate = async () => {
         const { trackerVal } = this.state;
-        const url = endPoint + trackerVal + key;
+        const url = `${endPoint}/${trackerVal}`;
         this.setState({ showMessage: false });
         fetch(url, { headers, method: 'GET', credentials: 'include' }).then((response) => response.json())
             .then((response) => {
@@ -65,17 +63,19 @@ export default class TrackerCheck extends Component {
             submit.classList.add('shake');
             setTimeout(() => submit.classList.remove('shake'), 800);
         } else {
-            let time, device_id, device_type;
+            let time, device_id, device_type, instance_id;
             try {
                 // [time] = Object.values(res);
                 // const reg = /=>.*/g;
                 // time = time.match(reg)[0].replace('=> ', '');
                 // time = moment(time).fromNow();
 
-                device_type = res.device_type;
-                device_id = res.device_id;
-                time = res.synced_at;
-                time = moment(time).fromNow();
+                device_type = res.deviceType;
+                device_id = res.deviceId;
+                instance_id = res.instanceId;
+                time = new Date(res.lastPing);
+                // time = moment(time).fromNow();
+                time = moment(time).add('30', 'minutes').add('5', 'hours').fromNow();
                 setTimeout(() => {
                     const message = document.getElementById('display-success');
                     if (message) {
@@ -95,6 +95,7 @@ export default class TrackerCheck extends Component {
             if (device_id || device_type) {
                 message.push(`Device Id -  ${device_id}`);
                 message.push(`Device Type -  ${device_type}`);
+                message.push(`Instance : ${instance_id}`);
             }
         }
         this.setState({ message, messageType, showMessage: true });
